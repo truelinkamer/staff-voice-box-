@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Staff Voice Box – Management</title>
+<style>
+:root{--bg:#f3f5f4;--card:#fff;--ink:#14231c;--mute:#5b6a62;--line:#d9dfdb;--green:#0b6b3a;--red:#b3202a;--amber:#a8630a}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1512;--card:#17201b;--ink:#eef3f0;--mute:#9baba2;--line:#2a3730}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;gap:10px;flex-wrap:wrap}
+h1{font-size:17px;margin:0}
+button,select,input,textarea{font:inherit;color:var(--ink)}
+.btn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer}
+.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+select,input,textarea{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:8px 10px;width:100%}
+textarea{min-height:90px;resize:vertical}
+#app{padding:0 16px 24px;max-width:1200px;margin:0 auto}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.stat{padding:10px 16px;min-width:110px}.stat b{font-size:22px;display:block}.stat span{color:var(--mute);font-size:12px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.filters select{width:auto}
+.grid{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:14px;align-items:start}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.list{max-height:72vh;overflow:auto}
+.row{display:block;width:100%;text-align:start;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 14px;cursor:pointer}
+.row:hover,.row[aria-current=true]{background:color-mix(in srgb,var(--green) 9%,transparent)}
+.row .t{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--mute)}
+.row p{margin:4px 0 0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tag{font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px;border:1px solid currentColor}
+.complaint{color:var(--red)}.suggestion{color:var(--green)}.High{color:var(--red)}.Medium{color:var(--amber)}.Low{color:var(--mute)}
+.new{color:var(--red)}.in_progress{color:var(--amber)}.resolved{color:var(--green)}
+.detail{padding:18px;display:grid;gap:12px}
+.msgbox{background:var(--bg);border-radius:8px;padding:12px;white-space:pre-wrap;word-break:break-word}
+label{font-weight:700;font-size:12px;display:block;margin-bottom:4px}
+.hint{color:var(--mute);font-size:12px}.err{color:var(--red)}.empty{padding:40px;text-align:center;color:var(--mute)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="bar"><h1>Staff Voice Box · Management</h1>
+    <div><button class="btn ghost" id="refresh">Refresh</button></div></div>
+  <div class="stats" id="stats"></div>
+  <div class="filters">
+    <select id="fs"><option value="">All statuses</option><option value="new">New</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select>
+    <select id="ft"><option value="">Complaints and suggestions</option><option value="complaint">Complaints</option><option value="suggestion">Suggestions</option></select>
+    <select id="fu"><option value="">Any urgency</option><option>High</option><option>Medium</option><option>Low</option></select>
+  </div>
+  <div class="grid">
+    <div class="card list" id="list"></div>
+    <div class="card" id="detail"><div class="empty">Select a message to read and respond.</div></div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const LBL={new:"New",in_progress:"In progress",resolved:"Resolved"};
+let items=[],cur=null;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=d=>new Date(d).toLocaleString([], {dateStyle:"medium",timeStyle:"short"});
+async function api(p,o={}){
+  const r=await fetch("/api/"+p,{...o,headers:{"Content-Type":"application/json"}});
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function load(){
+  const d=await api("admin/list"); items=d.items;
+  render();
+}
+function render(){
+  const c=k=>items.filter(i=>i.status===k).length;
+  $("#stats").innerHTML=[["Total",items.length],["New",c("new")],["In progress",c("in_progress")],["Resolved",c("resolved")],["High urgency open",items.filter(i=>i.urgency==="High"&&i.status!=="resolved").length]]
+    .map(([a,b])=>`<div class="card stat"><b>${b}</b><span>${a}</span></div>`).join("");
+  const fs=$("#fs").value,ft=$("#ft").value,fu=$("#fu").value;
+  const v=items.filter(i=>(!fs||i.status===fs)&&(!ft||i.type===ft)&&(!fu||i.urgency===fu));
+  $("#list").innerHTML=v.length?v.map(i=>`<button class="row" data-c="${i.code}" aria-current="${cur&&cur.code===i.code}">
+    <div class="t"><span><span class="tag ${i.type}">${i.type}</span> <span class="tag ${i.urgency}">${i.urgency}</span></span><span class="${i.status}">${LBL[i.status]}${i.reply?" · replied":""}</span></div>
+    <p dir="auto">${esc(i.message)}</p><div class="t"><span>${esc(i.area)}</span><span>${fmt(i.createdAt)}</span></div></button>`).join(""):'<div class="empty">No messages match.</div>';
+}
+function show(code){
+  cur=items.find(i=>i.code===code); if(!cur)return; render();
+  $("#detail").innerHTML=`<div class="detail">
+    <div><span class="tag ${cur.type}">${cur.type}</span> <span class="tag ${cur.urgency}">${cur.urgency}</span>
+    <span class="hint"> ${esc(cur.area)} · ${fmt(cur.createdAt)} · Ref ${cur.code} · written in ${cur.language==="ar"?"Arabic":"English"}</span></div>
+    <div class="msgbox" dir="auto">${esc(cur.message)}</div>
+    <div><label for="st">Status</label><select id="st">${Object.entries(LBL).map(([k,v])=>`<option value="${k}"${cur.status===k?" selected":""}>${v}</option>`).join("")}</select></div>
+    <div><label for="nt">Internal note (staff never see this)</label><textarea id="nt">${esc(cur.note)}</textarea></div>
+    <div><label for="rp">Reply to staff</label><textarea id="rp" dir="auto">${esc(cur.reply)}</textarea>
+    <div class="hint">Because messages are anonymous, the reply is shown to whoever enters reference code ${cur.code} on the form page. ${cur.repliedAt?"Last replied "+fmt(cur.repliedAt)+".":""}</div></div>
+    <div><button class="btn" id="save">Save</button> <span id="sm" class="hint"></span></div></div>`;
+  $("#save").onclick=async()=>{
+    $("#sm").textContent="Saving…";
+    try{const r=await api("admin/update",{method:"POST",body:JSON.stringify({code:cur.code,status:$("#st").value,note:$("#nt").value,reply:$("#rp").value})});
+      items=items.map(i=>i.code===cur.code?r.item:i);cur=r.item;render();$("#sm").textContent="Saved.";}
+    catch(e){$("#sm").innerHTML='<span class="err">Could not save. Try again.</span>'}
+  };
+}
+$("#list").onclick=e=>{const b=e.target.closest(".row");if(b)show(b.dataset.c)};
+["#fs","#ft","#fu"].forEach(s=>$(s).onchange=render);
+$("#refresh").onclick=()=>load().then(()=>cur&&show(cur.code));
+load().catch(()=>{$("#list").innerHTML='<div class="empty err">Could not load messages. Check that the site was deployed with the server function.</div>'});
+</script>
+</body>
+</html>
