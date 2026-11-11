@@ -15,7 +15,8 @@ export default async (req) => {
     if (body.bot) return J({ ok: true }); // honeypot
     const message = String(body.message || "").trim().slice(0, 1500);
     if (!message) return J({ error: "empty" }, 400);
-    const code = crypto.randomBytes(5).toString("hex").toUpperCase();
+    const AL = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const code = "SV-" + Array.from(crypto.randomBytes(8), (b) => AL[b % 32]).join("");
     await store.setJSON(code, {
       code, message,
       type: body.type === "suggestion" ? "suggestion" : "complaint",
@@ -31,7 +32,7 @@ export default async (req) => {
   // Staff: check for a management reply using their reference code
   if (path === "reply") {
     const code = (url.searchParams.get("code") || "").trim().toUpperCase();
-    const it = /^[A-F0-9]{10}$/.test(code) ? await store.get(code, { type: "json" }) : null;
+    const it = /^[A-Z0-9-]{8,12}$/.test(code) ? await store.get(code, { type: "json" }) : null;
     if (!it) return J({ error: "notfound" }, 404);
     return J({ status: it.status, reply: it.reply, repliedAt: it.repliedAt });
   }
@@ -48,11 +49,16 @@ export default async (req) => {
       const it = await store.get(String(body.code), { type: "json" });
       if (!it) return J({ error: "notfound" }, 404);
       if (["new", "in_progress", "resolved"].includes(body.status)) it.status = body.status;
-      it.note = String(body.note || "").slice(0, 3000);
-      const r = String(body.reply || "").trim().slice(0, 3000);
-      if (r !== it.reply) { it.reply = r; it.repliedAt = r ? new Date().toISOString() : null; }
+      if (typeof body.reply === "string") {
+        const r = body.reply.trim().slice(0, 3000);
+        if (r !== it.reply) { it.reply = r; it.repliedAt = r ? new Date().toISOString() : null; }
+      }
       await store.setJSON(it.code, it);
       return J({ item: it });
+    }
+    if (path === "admin/delete" && POST) {
+      await store.delete(String(body.code));
+      return J({ ok: true });
     }
   }
   return J({ error: "not found" }, 404);
