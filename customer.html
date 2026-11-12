@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Feedback – True Link</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5f4;--card:#fff;--ink:#14231c;--mute:#5b6a62;--line:#dde3df;--green:#0b6b3a;--red:#b3202a;--amber:#9a5b0a;--blue:#1d4f91;--redbg:#fbe8e8;--okbg:#e2f0e6;--ambbg:#fbefd9;--bluebg:#e3ecf7}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1512;--card:#17201b;--ink:#eef3f0;--mute:#9baba2;--line:#2a3730;--redbg:#3a1b1d;--okbg:#17301f;--ambbg:#3a2c12;--bluebg:#172a40}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Bricolage Grotesque",system-ui,sans-serif;padding:16px}
+html[dir=rtl] body{font-family:"IBM Plex Sans Arabic",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 28px}
+header{display:grid;grid-template-columns:110px 1fr 110px;align-items:center;gap:12px;text-align:center}
+header img{max-width:100%;max-height:78px;justify-self:center;background:#fff;border-radius:8px;padding:2px}
+header h1{font-size:18px;margin:6px 0;line-height:1.3}
+.tag{font-size:11px;letter-spacing:.2em;color:var(--mute)}
+.bar{display:flex;gap:6px;justify-content:center;margin:8px 0}.bar i{width:32px;height:3px;background:#d4202c}.bar i:nth-child(2){background:#111}.bar i:nth-child(3){background:#0b8a4a}
+.note{font-size:12px;color:var(--mute)}
+.nav{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:6px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--mute);font:inherit;font-weight:600;padding:8px 12px;cursor:pointer;margin-bottom:-1px}
+.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--green)}
+.lang{display:flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-bottom:6px;background:var(--card)}
+.lang button{border:0;background:none;color:var(--ink);padding:5px 14px;font:inherit;font-size:12px;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--ink);color:var(--card);font-weight:600}
+h2{margin:0 0 4px;font-size:22px}.sub{color:var(--mute);margin:0 0 20px;max-width:440px}
+fieldset{border:0;padding:0;margin:0 0 20px}
+legend,label.l{display:block;font-weight:700;font-size:13px;margin-bottom:8px;padding:0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt input,.pill input{position:absolute;opacity:0;pointer-events:none}
+.opt span{display:block;border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;height:100%}
+.opt b{display:block;font-size:13px}.opt small{color:var(--mute);font-size:12px}
+.opt input:checked+span{border:2px solid var(--red);background:var(--redbg);padding:11px 13px}
+.opt input[value=suggestion]:checked+span{border-color:var(--green);background:var(--okbg)}
+.pills{display:flex;gap:10px;flex-wrap:wrap}
+.pill span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:6px 18px;font-size:13px;cursor:pointer}
+.pill input:checked+span{background:var(--ink);color:var(--card);border-color:var(--ink);font-weight:600}
+input:focus-visible+span,select:focus-visible,textarea:focus-visible,.in:focus-visible,button:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+select,textarea,.in{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;padding:11px 12px}
+textarea{min-height:130px;resize:vertical}
+.count{text-align:end;font-size:12px;color:var(--mute);margin-top:6px}
+.priv{background:var(--okbg);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--mute);margin:8px 0 16px}
+.msg{margin:0 0 14px;font-size:13px;font-weight:600}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}
+.send{background:var(--green);color:#fff;border:0;border-radius:8px;padding:12px 26px;font:inherit;font-weight:700;cursor:pointer}
+.send[disabled]{opacity:.6;cursor:wait}
+.hp{position:absolute;left:-9999px}
+.done{text-align:center;padding:30px 6px}.done h2{color:var(--green)}
+.code{font:700 22px/1 ui-monospace,Consolas,monospace;letter-spacing:.1em;background:var(--okbg);border-radius:8px;padding:14px;display:inline-block;user-select:all}
+.chk{display:flex;gap:8px;margin-bottom:16px}.chk .in{font:600 15px ui-monospace,Consolas,monospace;text-transform:uppercase}
+.tk{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:12px}
+.tk .h{display:flex;gap:8px 10px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--mute)}
+.tk code{font:700 12px ui-monospace,Consolas,monospace;color:var(--ink)}
+.st{font-weight:700;border-radius:99px;padding:2px 10px}
+.st.new{background:var(--bluebg);color:var(--blue)}.st.in_progress{background:var(--ambbg);color:var(--amber)}.st.resolved{background:var(--okbg);color:var(--green)}
+.tk p{margin:8px 0 0;white-space:pre-wrap;word-break:break-word}
+.rp{margin-top:10px;background:var(--okbg);border-inline-start:3px solid var(--green);border-radius:4px;padding:8px 12px}
+.rp b{display:block;font-size:12px;color:var(--mute)}.rp div{white-space:pre-wrap;word-break:break-word}
+.empty{color:var(--mute);text-align:center;padding:18px}
+@media(max-width:560px){header{grid-template-columns:64px 1fr 64px}header img{max-height:56px}.opts{grid-template-columns:1fr}.card{padding:20px}}
+.opts.three{grid-template-columns:repeat(3,1fr)}.opt input[value=feedback]:checked+span{border:2px solid var(--blue);background:var(--bluebg);padding:11px 13px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cgrid .full{grid-column:1/-1}
+@media(max-width:560px){.opts.three,.cgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="card">
+    <img src="logo-amer.png" alt="Amer" onerror="this.style.visibility='hidden'">
+    <div><div class="tag" data-i="tag"></div><h1>True Link Government<br>Transaction Center LLC</h1><div class="bar"><i></i><i></i><i></i></div><div class="note" data-i="internal"></div></div>
+    <img src="logo-truelink.png" alt="True Link" onerror="this.style.visibility='hidden'">
+  </header>
+  <div class="nav">
+    <div class="tabs" role="tablist"><button role="tab" data-tab="send" aria-selected="true" data-i="tabSend"></button><button role="tab" data-tab="check" aria-selected="false" data-i="tabCheck"></button></div>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">English</button><button type="button" data-lang="ar" aria-pressed="false">العربية</button></div>
+  </div>
+
+  <main class="card" id="p-send"><div id="formbox">
+    <h2 data-i="title"></h2><p class="sub" data-i="intro"></p>
+    <form id="f">
+      <p class="hp"><label>Leave empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+      <fieldset><legend data-i="q1"></legend><div class="opts three">
+        <label class="opt"><input type="radio" name="type" value="feedback" checked><span><b data-i="feedback"></b><small data-i="feedbackD"></small></span></label>
+        <label class="opt"><input type="radio" name="type" value="complaint"><span><b data-i="complaint"></b><small data-i="complaintD"></small></span></label>
+        <label class="opt"><input type="radio" name="type" value="suggestion"><span><b data-i="suggestion"></b><small data-i="suggestionD"></small></span></label>
+      </div></fieldset>
+      <div style="margin-bottom:20px"><label class="l" for="area" data-i="q2"></label>
+        <select id="area" name="area" required>
+          <option value="" disabled selected data-i="a0"></option>
+          <option value="Service quality" data-i="a1"></option><option value="Waiting time" data-i="a2"></option>
+          <option value="Staff behaviour" data-i="a3"></option><option value="Fees and payments" data-i="a4"></option>
+          <option value="Facilities and cleanliness" data-i="a5"></option><option value="Online or phone service" data-i="a6"></option>
+          <option value="Other" data-i="a7"></option>
+        </select></div>
+      <div><label class="l" for="message" data-i="q4"></label><textarea id="message" name="message" maxlength="1500" required></textarea><div class="count"><span id="n">0</span> / 1500</div></div>
+      <fieldset style="margin-top:18px"><legend data-i="cTitle"></legend><p class="note" style="margin:-4px 0 10px" data-i="cHint"></p>
+        <div class="cgrid">
+          <div><label class="l" for="name" data-i="name"></label><input class="in" id="name" name="name" maxlength="80" autocomplete="name"></div>
+          <div><label class="l" for="phone" data-i="phone"></label><input class="in" id="phone" name="phone" type="tel" maxlength="30" autocomplete="tel" dir="ltr"></div>
+          <div class="full"><label class="l" for="email" data-i="email"></label><input class="in" id="email" name="email" type="email" maxlength="120" autocomplete="email" dir="ltr"></div>
+        </div></fieldset>
+      <p class="msg" id="status" role="status" aria-live="polite"></p>
+      <button class="send" type="submit" id="btn" data-i="send"></button>
+    </form>
+  </div></main>
+
+  <section class="card" id="p-check" hidden>
+    <h2 data-i="ck"></h2><p class="sub" data-i="ckD"></p>
+    <div class="chk"><input class="in" id="code" dir="ltr" placeholder="CF-XXXXXXXX" maxlength="12" autocomplete="off" aria-label="Tracking code"><button class="send" type="button" id="ckb" data-i="ckB"></button></div>
+    <p class="msg err" id="ckerr" aria-live="polite"></p>
+    <div id="tickets"></div>
+  </section>
+</div>
+<script>
+const T={
+en:{tag:"CUSTOMER FEEDBACK",internal:"We read every message.",tabSend:"Send feedback",tabCheck:"Check status",title:"Tell us what you think",intro:"Share feedback, a complaint or a suggestion. It helps us improve our service.",q1:"What would you like to send?",feedback:"Feedback",feedbackD:"Tell us about your experience.",complaint:"A complaint",complaintD:"Something went wrong.",suggestion:"A suggestion",suggestionD:"An idea to improve our service.",q2:"What is it about?",a0:"Choose a topic",a1:"Service quality",a2:"Waiting time",a3:"Staff behaviour",a4:"Fees and payments",a5:"Facilities and cleanliness",a6:"Online or phone service",a7:"Other",q4:"Tell us more",cTitle:"Your details (optional)",cHint:"You do not have to add these. Add them only if you would like us to contact you.",name:"Name",phone:"Mobile number",email:"Email",send:"Send",sending:"Sending…",err:"Your message could not be sent. Check your connection and try again.",thanks:"Thank you. We received your message.",thanksD:"Your tracking code is below. Use Check status to follow progress and read our reply.",ck:"Check status",ckD:"Enter your tracking code to see what we have done with your message. Messages sent from this device are listed below.",ckB:"Check",ckNone:"No message found for that code.",ckFail:"Could not check right now. Try again.",ckEmpty:"No messages sent from this device yet.",ckNoText:"Message text is not stored on this device.",st_new:"Received",st_in_progress:"Being reviewed",st_resolved:"Resolved",sent:"Sent",reply:"Reply from us",t_feedback:"Feedback",t_complaint:"A complaint",t_suggestion:"A suggestion",again:"Send another"},
+ar:{tag:"آراء العملاء",internal:"نقرأ كل رسالة.",tabSend:"إرسال رأيك",tabCheck:"متابعة الحالة",title:"أخبرنا برأيك",intro:"شاركنا ملاحظاتك أو شكواك أو اقتراحك. فهذا يساعدنا على تحسين خدمتنا.",q1:"ماذا تريد أن ترسل؟",feedback:"ملاحظات",feedbackD:"أخبرنا عن تجربتك.",complaint:"شكوى",complaintD:"حدث خطأ ما.",suggestion:"اقتراح",suggestionD:"فكرة لتحسين خدمتنا.",q2:"ما موضوع رسالتك؟",a0:"اختر الموضوع",a1:"جودة الخدمة",a2:"وقت الانتظار",a3:"تعامل الموظفين",a4:"الرسوم والمدفوعات",a5:"المرافق والنظافة",a6:"الخدمة الإلكترونية أو الهاتفية",a7:"أخرى",q4:"أخبرنا بالمزيد",cTitle:"بياناتك (اختياري)",cHint:"لا يلزمك إضافتها. أضفها فقط إذا أردت أن نتواصل معك.",name:"الاسم",phone:"رقم الجوال",email:"البريد الإلكتروني",send:"إرسال",sending:"جارٍ الإرسال…",err:"تعذّر إرسال رسالتك. تحقق من الاتصال وحاول مرة أخرى.",thanks:"شكرًا لك. استلمنا رسالتك.",thanksD:"رمز المتابعة أدناه. استخدم «متابعة الحالة» لمعرفة التقدم وقراءة ردنا.",ck:"متابعة الحالة",ckD:"أدخل رمز المتابعة لترى ما فعلناه بشأن رسالتك. الرسائل المرسلة من هذا الجهاز مدرجة أدناه.",ckB:"تحقق",ckNone:"لا توجد رسالة بهذا الرمز.",ckFail:"تعذّر التحقق الآن. حاول مرة أخرى.",ckEmpty:"لم تُرسل أي رسائل من هذا الجهاز بعد.",ckNoText:"نص الرسالة غير محفوظ على هذا الجهاز.",st_new:"تم الاستلام",st_in_progress:"قيد المراجعة",st_resolved:"تم الحل",sent:"أُرسلت",reply:"ردنا",t_feedback:"ملاحظات",t_complaint:"شكوى",t_suggestion:"اقتراح",again:"إرسال رسالة أخرى"}};
+let lang="en";
+const $=s=>document.querySelector(s),f=$("#f"),LS="cfbox";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mine=()=>{try{return JSON.parse(localStorage.getItem(LS)||"[]")}catch(e){return[]}};
+const keep=l=>{try{localStorage.setItem(LS,JSON.stringify(l.slice(0,100)))}catch(e){}};
+const fmt=d=>new Date(d).toLocaleString(lang==="ar"?"ar-AE":"en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+const areaKeys={"Service quality":"a1","Waiting time":"a2","Staff behaviour":"a3","Fees and payments":"a4","Facilities and cleanliness":"a5","Online or phone service":"a6","Other":"a7"};
+function setLang(l){
+  lang=l;document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";
+  document.querySelectorAll("[data-i]").forEach(e=>{const v=T[l][e.dataset.i];if(v)e.textContent=v});
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===l));
+  try{localStorage.setItem("lang",l)}catch(e){}
+  if(!$("#p-check").hidden)loadTickets();
+}
+function tab(t){
+  $("#p-send").hidden=t!=="send";$("#p-check").hidden=t!=="check";
+  document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  if(t==="check")loadTickets();
+}
+document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+$("#message").addEventListener("input",e=>$("#n").textContent=e.target.value.length);
+try{const s=localStorage.getItem("lang");setLang(T[s]?s:"en")}catch(e){setLang("en")}
+async function status(code){
+  const r=await fetch("/api/reply?code="+encodeURIComponent(code));
+  if(r.status===404)return null;if(!r.ok)throw 0;return r.json();
+}
+function card(t,s){
+  const L=T[lang],al=L[areaKeys[t.area]]||t.area||"";
+  return `<div class="tk"><div class="h"><code>${esc(t.code)}</code><span class="st ${s?s.status:"new"}">${s?L["st_"+s.status]:"…"}</span><span>${esc((t.type?L["t_"+t.type]:"")+(al?" · "+al:""))}</span>${t.at?`<span>${L.sent} ${fmt(t.at)}</span>`:""}</div>
+  <p dir="auto">${t.message?esc(t.message):`<span class="note">${L.ckNoText}</span>`}</p>
+  ${s&&s.reply?`<div class="rp"><b>${L.reply}</b><div dir="auto">${esc(s.reply)}</div></div>`:""}</div>`;
+}
+async function loadTickets(){
+  const list=mine(),box=$("#tickets");
+  if(!list.length){box.innerHTML=`<div class="empty">${T[lang].ckEmpty}</div>`;return}
+  box.innerHTML=list.map(t=>card(t,null)).join("");
+  const res=await Promise.all(list.map(t=>status(t.code).catch(()=>null)));
+  box.innerHTML=list.map((t,i)=>card(t,res[i])).join("");
+}
+$("#ckb").onclick=async()=>{
+  const c=$("#code").value.trim().toUpperCase(),err=$("#ckerr");err.textContent="";if(!c)return;
+  try{
+    const s=await status(c);if(!s){err.textContent=T[lang].ckNone;return}
+    const l=mine();if(!l.some(t=>t.code===c)){l.unshift({code:c});keep(l)}
+    $("#code").value="";loadTickets();
+  }catch(e){err.textContent=T[lang].ckFail}
+};
+f.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const st=$("#status"),btn=$("#btn");st.className="msg";st.textContent="";
+  btn.disabled=true;btn.textContent=T[lang].sending;
+  try{
+    const o=Object.fromEntries(new FormData(f));o.bot=o["bot-field"];o.language=lang;o.source="customer";
+    const r=await fetch("/api/submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(o)});
+    if(!r.ok)throw 0;
+    const {code}=await r.json();
+    const l=mine();l.unshift({code,type:o.type,area:o.area,message:o.message.trim(),at:new Date().toISOString()});keep(l);
+    $("#formbox").innerHTML=`<div class="done"><h2>${T[lang].thanks}</h2><p class="sub" style="margin:0 auto 14px">${T[lang].thanksD}</p><div class="code" dir="ltr">${code}</div><p style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="send" type="button" id="go">${T[lang].tabCheck}</button><button class="send" type="button" id="again" style="background:none;color:var(--ink);border:1px solid var(--line)">${T[lang].again}</button></p></div>`;
+    $("#go").onclick=()=>tab("check");$("#again").onclick=()=>location.reload();
+  }catch(err){st.className="msg err";st.textContent=T[lang].err;btn.disabled=false;btn.textContent=T[lang].send}
+});
+</script>
+</body>
+</html>
